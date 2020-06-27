@@ -1,3 +1,4 @@
+# -_-coding: utf-8 -_-
 import heapq
 import sys
 import traceback
@@ -56,6 +57,7 @@ class BaseHub(object):
         self.secondaries = {READ:{}, WRITE:{}}
 
         self.clock = clock
+        # 父协程
         self.greenlet = greenlet.greenlet(self.run)
         self.stopping = False
         self.running = False
@@ -207,6 +209,7 @@ class BaseHub(object):
 
     def _add_absolute_timer(self, when, info):
         # the 0 placeholder makes it easy to bisect_right using (now, 1)
+        # 注册 timer
         self.next_timers.append((when, 0, info))
 
     def add_timer(self, timer):
@@ -253,6 +256,7 @@ class BaseHub(object):
         return t
 
     def fire_timers(self, when):
+        # 执行注册的timers
         t = self.timers
         heappop = heapq.heappop
 
@@ -261,7 +265,8 @@ class BaseHub(object):
 
             exp = next[0]
             timer = next[2]
-
+            # when当前时间
+            # 触发时间在当前时间之后时，跳出循环
             if when < exp:
                 break
 
@@ -269,6 +274,9 @@ class BaseHub(object):
 
             try:
                 try:
+                    # 调用timer中的g.switch方法, 执行子协程方法，执行完成后，
+                    # 继续执行其他协程, 最后执行eventlet.sleep(0)注册的父协程
+                    # 切换
                     timer()
                 except self.SYSTEM_EXCEPTIONS:
                     raise
