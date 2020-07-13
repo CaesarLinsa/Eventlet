@@ -138,6 +138,7 @@ class BaseHub(object):
         except ValueError:
             pass  # gets raised if there is a greenlet parent cycle
         clear_sys_exc_info()
+        # 执行self.run，进行调度表
         return self.greenlet.switch()
 
     def squelch_exception(self, fileno, exc_info):
@@ -224,6 +225,8 @@ class BaseHub(object):
         self.timer_finished(timer)
 
     def prepare_timers(self):
+        # 将self.next_timers 移动到self.timers中，清空self.next_timers
+        # 使用堆，可以弹出最小时间
         heappush = heapq.heappush
         t = self.timers
         for item in self.next_timers:
@@ -258,6 +261,7 @@ class BaseHub(object):
     def fire_timers(self, when):
         # 执行注册的timers
         t = self.timers
+        # 弹出最小时间
         heappop = heapq.heappop
 
         while t:
@@ -266,7 +270,7 @@ class BaseHub(object):
             exp = next[0]
             timer = next[2]
             # when当前时间
-            # 触发时间在当前时间之后时，跳出循环
+            # 触发时间在当前时间之后时，跳出循环，事件需要等待self.wait(剩余时间)
             if when < exp:
                 break
 

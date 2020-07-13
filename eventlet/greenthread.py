@@ -1,3 +1,4 @@
+# -_-coding: utf-8 -_-
 import sys
 
 from eventlet import event
@@ -42,7 +43,9 @@ def spawn(func, *args, **kwargs):
     after a finite delay.
     """
     hub = hubs.get_hub()
+    # hub.greenlet 父协程
     g = GreenThread(hub.greenlet)
+    # hub中注册self.next_timers(hub初始化时间+ 0，timer对象)
     hub.schedule_call_global(0, g.switch, func, args, kwargs)
     return g
     

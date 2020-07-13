@@ -1,3 +1,4 @@
+# -_-coding: utf-8 -_-
 import sys
 import errno
 from eventlet import patcher
@@ -73,6 +74,7 @@ class Hub(BaseHub):
                 sleep(seconds)
             return
         try:
+            # Todo 此处依然是阻塞？
             presult = self.poll.poll(int(seconds * self.WAIT_MULTIPLIER))
         except select.error, e:
             if get_errno(e) == errno.EINTR:

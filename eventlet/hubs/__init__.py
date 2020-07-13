@@ -1,3 +1,4 @@
+# -_-coding: utf-8 -_-
 import sys
 import os
 from eventlet.support import greenlets as greenlet
@@ -69,13 +70,14 @@ def use_hub(mod=None):
         assert mod.strip(), "Need to specify a hub"
         mod = __import__('eventlet.hubs.' + mod, globals(), locals(), ['Hub'])
     if hasattr(mod, 'Hub'):
+        # threading.local的Hub，对应Hub类(cls)
         _threadlocal.Hub = mod.Hub
     else:
         _threadlocal.Hub = mod
 
+
 def get_hub():
     """Get the current event hub singleton object.
-    
     .. note :: |internal|
     """
     try:
@@ -85,6 +87,8 @@ def get_hub():
             _threadlocal.Hub
         except AttributeError:
             use_hub()
+        # 初始化Hub cls 类，绑定在threading.local的hub属性
+        # 故知， 其Hub对应cls， hub对应self
         hub = _threadlocal.hub = _threadlocal.Hub()
     return hub
 
