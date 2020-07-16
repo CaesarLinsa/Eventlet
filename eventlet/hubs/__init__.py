@@ -122,12 +122,19 @@ def trampoline(fd, read=None, write=None, timeout=None,
         t = hub.schedule_call_global(timeout, current.throw, timeout_exc)
     try:
         if read:
+            # 注册读监听（此处是“main”协程), 用于跳出父协程
+            # 在epoll多路复用时，一旦监听到读事件
+            # 执行current.switch切换到hub 父协程的switch方法，到run方法
+            # 进行遍历堆，执行 子协程 注册的方法
             listener = hub.add(hub.READ, fileno, current.switch)
         elif write:
             listener = hub.add(hub.WRITE, fileno, current.switch)
         try:
+            # 调用hub的switch，到self.eventlet的run方法
+            # 从而父协程进行调度
             return hub.switch()
         finally:
+        # 读事件时，切换"mian"协程到此处
             hub.remove(listener)
     finally:
         if t is not None:

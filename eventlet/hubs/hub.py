@@ -180,6 +180,8 @@ class BaseHub(object):
                     sleep_time = self.default_sleep()
                 else:
                     sleep_time = wakeup_when - self.clock()
+                # 父协程调用
+                # wait使用epoll.poll阻塞进程，等待连接接入
                 if sleep_time > 0:
                     self.wait(sleep_time)
                 else:
@@ -280,7 +282,7 @@ class BaseHub(object):
                 try:
                     # 调用timer中的g.switch方法, 执行子协程方法，执行完成后，
                     # 继续执行其他协程, 最后执行eventlet.sleep(0)注册的父协程
-                    # 切换
+                    # 切换到main协程
                     timer()
                 except self.SYSTEM_EXCEPTIONS:
                     raise

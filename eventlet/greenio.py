@@ -1,3 +1,4 @@
+# -_-coding: utf-8 -_-
 from eventlet.support import get_errno
 from eventlet.hubs import trampoline
 BUFFER_SIZE = 4096
@@ -145,6 +146,8 @@ class GreenSocket(object):
             return self.fd.accept()
         fd = self.fd
         while True:
+            # 无用户连接时连接失败，Resource temporarily unavailable，进行trampoline
+
             res = socket_accept(fd)
             if res is not None:
                 client, addr = res

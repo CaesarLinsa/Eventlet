@@ -74,7 +74,7 @@ class Hub(BaseHub):
                 sleep(seconds)
             return
         try:
-            # Todo 此处依然是阻塞？
+            # Todo 此处依然是阻塞
             presult = self.poll.poll(int(seconds * self.WAIT_MULTIPLIER))
         except select.error, e:
             if get_errno(e) == errno.EINTR:
@@ -85,6 +85,7 @@ class Hub(BaseHub):
         for fileno, event in presult:
             try:
                 if event & READ_MASK:
+                    # current.switch 此处切回"main"协程
                     readers.get(fileno, noop).cb(fileno)
                 if event & WRITE_MASK:
                     writers.get(fileno, noop).cb(fileno)
